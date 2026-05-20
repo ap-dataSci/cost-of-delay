@@ -1,1 +1,199 @@
 @import "tailwindcss";
+
+@theme {
+  /* Palette — dark editorial. Near-black slate with warm cream ink,
+     luminous emerald (early-start path), and amber-copper (the gap). */
+  --color-paper: #07090d;
+  --color-paper-elevated: #0e131b;
+  --color-paper-raised: #141a24;
+  --color-ink: #f4ede1;
+  --color-ink-soft: #d8d2c6;
+  --color-ink-muted: #8a8478;
+  --color-ink-whisper: #565249;
+  --color-rule: #1a212c;
+  --color-rule-strong: #2a3142;
+  --color-emerald-deep: #34d399;
+  --color-emerald-mid: #10b981;
+  --color-emerald-glow: rgba(52, 211, 153, 0.22);
+  --color-copper: #f59e0b;
+  --color-copper-soft: #fbbf24;
+  --color-copper-deep: #d97706;
+  --color-copper-glow: rgba(245, 158, 11, 0.18);
+
+  /* Type — display serif + mono for figures. Sans inherits from layout. */
+  --font-display: var(--font-fraunces);
+  --font-mono: var(--font-mono);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-feature-settings: "ss01", "cv11";
+    /* Dark grain. Soft emerald aurora at top, copper warmth at bottom-right,
+       and a subtle SVG noise mask over the whole canvas. */
+    background-image:
+      radial-gradient(
+        ellipse 1200px 700px at 50% -10%,
+        rgba(52, 211, 153, 0.10) 0%,
+        rgba(52, 211, 153, 0) 60%
+      ),
+      radial-gradient(
+        ellipse 900px 600px at 95% 95%,
+        rgba(245, 158, 11, 0.07) 0%,
+        rgba(245, 158, 11, 0) 65%
+      ),
+      url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background-color: var(--color-emerald-deep);
+    color: var(--color-paper);
+  }
+
+  /* Default focus ring — emerald, generous. */
+  :focus-visible {
+    outline: 2px solid var(--color-emerald-deep);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Spin chrome off number inputs — we have our own field design. */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer utilities {
+  /* Hairline divider with serif-page weight. */
+  .rule-fine {
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      var(--color-rule-strong) 20%,
+      var(--color-rule-strong) 80%,
+      transparent
+    );
+    height: 1px;
+  }
+
+  /* Section numeral — small caps mono, copper, with a leading dash. */
+  .numeral {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-copper);
+  }
+
+  /* Tabular-figure mono used for every dollar / age / percent. */
+  .figure {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "zero";
+  }
+
+  /* Editorial display headline — Fraunces, opsz-aware. */
+  .display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings:
+      "opsz" 144,
+      "SOFT" 30,
+      "WONK" 0;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  /* Hand-drawn underline (used to mark a phrase in display copy). */
+  .underline-brush {
+    background-image: linear-gradient(
+      transparent 62%,
+      rgba(245, 158, 11, 0.55) 62%,
+      rgba(245, 158, 11, 0.55) 86%,
+      transparent 86%
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  /* Slow pulse for the scroll cue dot. */
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+  .animate-pulse-soft {
+    animation: pulse-soft 2.6s ease-in-out infinite;
+  }
+
+  /* Drift animation on hero decorative orb. */
+  @keyframes drift {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(20px, -16px, 0) scale(1.06); }
+  }
+  .animate-drift {
+    animation: drift 14s ease-in-out infinite;
+  }
+
+  @keyframes drift-slow {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(-26px, 18px, 0) scale(1.04); }
+  }
+  .animate-drift-slow {
+    animation: drift-slow 22s ease-in-out infinite;
+  }
+
+  /* Slow spin for orbital decorative rings. */
+  @keyframes orbit-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .animate-orbit-slow {
+    animation: orbit-slow 60s linear infinite;
+  }
+  .animate-orbit-reverse {
+    animation: orbit-slow 90s linear infinite reverse;
+  }
+
+  /* Twinkling star points. */
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.9; }
+  }
+  .animate-twinkle {
+    animation: twinkle 5s ease-in-out infinite;
+  }
+
+  /* Floating mote that drifts upward. */
+  @keyframes mote-rise {
+    0% { transform: translate3d(0, 20px, 0); opacity: 0; }
+    20% { opacity: 0.9; }
+    100% { transform: translate3d(0, -120px, 0); opacity: 0; }
+  }
+  .animate-mote-rise {
+    animation: mote-rise 12s linear infinite;
+  }
+
+  /* Aurora gradient sweep. */
+  @keyframes aurora {
+    0%, 100% { transform: translate3d(-10%, 0, 0) scaleY(1); opacity: 0.55; }
+    50%      { transform: translate3d(10%,  -3%, 0) scaleY(1.08); opacity: 0.85; }
+  }
+  .animate-aurora {
+    animation: aurora 18s ease-in-out infinite;
+  }
+}

@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 type Props = {
   label: string;
   placeholder: string;
@@ -12,6 +14,11 @@ type Props = {
   step?: number;
 };
 
+/**
+ * Editorial input row. Label sits above as small-caps, the value renders in
+ * mono tabular-numbers for a "ledger" feel, unit is a quiet caption to the
+ * right, and a thin underline accent in copper signals focus/valid.
+ */
 export default function NumberField({
   label,
   placeholder,
@@ -23,6 +30,7 @@ export default function NumberField({
   max,
   step,
 }: Props) {
+  const id = useId();
   const isValid =
     value !== undefined &&
     Number.isFinite(value) &&
@@ -30,21 +38,29 @@ export default function NumberField({
     (max === undefined || value <= max);
 
   return (
-    <label className="group flex flex-col gap-1">
-      <span className="text-sm text-neutral-500 transition-colors group-focus-within:text-neutral-900">
-        {label}
-      </span>
+    <div className="group flex flex-col gap-1.5">
+      <label
+        htmlFor={id}
+        className="flex items-baseline justify-between text-[0.7rem] uppercase tracking-[0.16em] text-[var(--color-ink-muted)] transition-colors group-focus-within:text-[var(--color-ink)]"
+      >
+        <span>{label}</span>
+        <span className="font-normal normal-case tracking-normal text-[var(--color-ink-whisper)]">
+          {unit}
+        </span>
+      </label>
+
       <div
         className={[
-          "flex items-center gap-3 rounded-md border bg-white px-4 py-2",
-          "transition-all duration-200 ease-out",
+          "relative flex items-center",
+          "border-b transition-colors duration-200 ease-out",
           isValid
-            ? "border-neutral-900/20"
-            : "border-neutral-300",
-          "focus-within:border-neutral-900 focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]",
+            ? "border-[var(--color-ink-soft)]"
+            : "border-[var(--color-rule-strong)]",
+          "focus-within:border-[var(--color-copper)]",
         ].join(" ")}
       >
         <input
+          id={id}
           type="number"
           inputMode="decimal"
           min={min}
@@ -60,14 +76,28 @@ export default function NumberField({
             const n = Number(raw);
             onChange(Number.isFinite(n) ? n : undefined);
           }}
-          className="flex-1 bg-transparent text-lg tabular-nums focus:outline-none"
+          className="figure flex-1 bg-transparent py-2 text-2xl text-[var(--color-ink)] placeholder:text-[var(--color-ink-whisper)] placeholder:font-light focus:outline-none"
           placeholder={placeholder}
         />
         <ValidCheck visible={isValid} />
-        <span className="text-xs text-neutral-400">{unit}</span>
+
+        {/* Copper accent underline that animates in when focused. */}
+        <span
+          aria-hidden
+          className={[
+            "pointer-events-none absolute -bottom-px left-0 h-[2px] bg-[var(--color-copper)]",
+            "transition-[width] duration-300 ease-out",
+            "w-0 group-focus-within:w-full",
+          ].join(" ")}
+        />
       </div>
-      {hint ? <span className="text-xs text-neutral-400">{hint}</span> : null}
-    </label>
+
+      {hint ? (
+        <span className="text-xs italic text-[var(--color-ink-muted)]">
+          {hint}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -84,7 +114,7 @@ function ValidCheck({ visible }: { visible: boolean }) {
       strokeLinejoin="round"
       aria-hidden="true"
       className={[
-        "text-emerald-600 motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out",
+        "ml-3 text-[var(--color-emerald-mid)] motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out",
         visible
           ? "scale-100 opacity-100"
           : "scale-50 opacity-0 motion-reduce:scale-100",

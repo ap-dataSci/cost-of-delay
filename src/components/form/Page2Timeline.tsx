@@ -3,6 +3,7 @@
 import { copy } from "@/content/copy";
 import NumberField from "./NumberField";
 import ScrollGate from "./ScrollGate";
+import FormSectionShell from "./FormSectionShell";
 
 export type Page2Values = {
   startWorkingAge?: number;
@@ -40,56 +41,47 @@ export default function Page2Timeline({ values, currentAge, onChange }: Props) {
   const valid = isPage2Valid(values, currentAge);
 
   return (
-    <section
+    <FormSectionShell
       id="your-timeline"
-      data-form-page="2"
-      className="flex min-h-screen flex-col items-center justify-center px-6 py-16"
-    >
-      <div className="flex w-full max-w-md flex-col gap-6">
-        <header className="flex flex-col gap-2">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            {t.heading}
-          </h2>
-          <p className="text-sm text-neutral-500">{t.subheading}</p>
-        </header>
-
-        <div className="flex flex-col gap-4">
-          <NumberField
-            {...t.fields.startWorkingAge}
-            value={values.startWorkingAge}
-            onChange={(v) => onChange({ ...values, startWorkingAge: v })}
-            min={14}
-            max={75}
-          />
-          <NumberField
-            {...t.fields.pastMonthlyCapacity}
-            value={values.pastMonthlyCapacity}
-            onChange={(v) => onChange({ ...values, pastMonthlyCapacity: v })}
-            min={0}
-          />
-          <NumberField
-            {...t.fields.startInvestingAge}
-            value={values.startInvestingAge}
-            onChange={(v) => onChange({ ...values, startInvestingAge: v })}
-            min={14}
-            max={75}
-          />
-          <NumberField
-            {...t.fields.targetRetirementAge}
-            value={values.targetRetirementAge}
-            onChange={(v) => onChange({ ...values, targetRetirementAge: v })}
-            min={30}
-            max={90}
-          />
-        </div>
-
+      pageNumber={2}
+      heading={t.heading}
+      subheading={t.subheading}
+      footer={
         <ScrollGate
           valid={valid}
           validHint={t.scrollHint}
           invalidHint={copy.form.invalidHint}
           nextTargetId="assumptions"
         />
-      </div>
-    </section>
+      }
+    >
+      <NumberField
+        {...t.fields.startWorkingAge}
+        value={values.startWorkingAge}
+        onChange={(v) => onChange({ ...values, startWorkingAge: v })}
+        min={14}
+        max={75}
+      />
+      <NumberField
+        {...t.fields.pastMonthlyCapacity}
+        value={values.pastMonthlyCapacity}
+        onChange={(v) => onChange({ ...values, pastMonthlyCapacity: v })}
+        min={0}
+      />
+      <NumberField
+        {...t.fields.startInvestingAge}
+        value={values.startInvestingAge}
+        onChange={(v) => onChange({ ...values, startInvestingAge: v })}
+        min={14}
+        max={75}
+      />
+      <NumberField
+        {...t.fields.targetRetirementAge}
+        value={values.targetRetirementAge}
+        onChange={(v) => onChange({ ...values, targetRetirementAge: v })}
+        min={30}
+        max={90}
+      />
+    </FormSectionShell>
   );
 }

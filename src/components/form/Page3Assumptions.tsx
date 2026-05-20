@@ -3,6 +3,7 @@
 import { copy } from "@/content/copy";
 import NumberField from "./NumberField";
 import ScrollGate from "./ScrollGate";
+import FormSectionShell from "./FormSectionShell";
 
 export type Page3Values = {
   annualExpenses?: number;
@@ -34,51 +35,42 @@ export default function Page3Assumptions({ values, onChange }: Props) {
   const valid = isPage3Valid(values);
 
   return (
-    <section
+    <FormSectionShell
       id="assumptions"
-      data-form-page="3"
-      className="flex min-h-screen flex-col items-center justify-center px-6 py-16"
-    >
-      <div className="flex w-full max-w-md flex-col gap-6">
-        <header className="flex flex-col gap-2">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            {t.heading}
-          </h2>
-          <p className="text-sm text-neutral-500">{t.subheading}</p>
-        </header>
-
-        <div className="flex flex-col gap-4">
-          <NumberField
-            {...t.fields.annualExpenses}
-            value={values.annualExpenses}
-            onChange={(v) => onChange({ ...values, annualExpenses: v })}
-            min={0}
-          />
-          <NumberField
-            {...t.fields.savingsGrowthRate}
-            value={values.savingsGrowthRatePct}
-            onChange={(v) => onChange({ ...values, savingsGrowthRatePct: v })}
-            min={0}
-            max={20}
-            step={0.1}
-          />
-          <NumberField
-            {...t.fields.investmentReturnRate}
-            value={values.investmentReturnRatePct}
-            onChange={(v) => onChange({ ...values, investmentReturnRatePct: v })}
-            min={0}
-            max={15}
-            step={0.1}
-          />
-        </div>
-
+      pageNumber={3}
+      heading={t.heading}
+      subheading={t.subheading}
+      footer={
         <ScrollGate
           valid={valid}
           validHint={t.scrollHint}
           invalidHint={copy.form.invalidHint}
           nextTargetId="narrative"
         />
-      </div>
-    </section>
+      }
+    >
+      <NumberField
+        {...t.fields.annualExpenses}
+        value={values.annualExpenses}
+        onChange={(v) => onChange({ ...values, annualExpenses: v })}
+        min={0}
+      />
+      <NumberField
+        {...t.fields.savingsGrowthRate}
+        value={values.savingsGrowthRatePct}
+        onChange={(v) => onChange({ ...values, savingsGrowthRatePct: v })}
+        min={0}
+        max={20}
+        step={0.1}
+      />
+      <NumberField
+        {...t.fields.investmentReturnRate}
+        value={values.investmentReturnRatePct}
+        onChange={(v) => onChange({ ...values, investmentReturnRatePct: v })}
+        min={0}
+        max={15}
+        step={0.1}
+      />
+    </FormSectionShell>
   );
 }

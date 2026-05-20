@@ -17,6 +17,8 @@ type ChartMarker = {
   color: string;
   label: string;
   labelOffsetY: number;
+  labelAnchor?: "start" | "end";
+  labelOffsetX?: number;
 };
 
 type DropLine = {
@@ -24,6 +26,9 @@ type DropLine = {
   point: BalancePoint;
   color: string;
   label: string;
+  labelOffsetY?: number;
+  labelAnchor?: "start" | "end";
+  labelOffsetX?: number;
 };
 
 type ChartState = {
@@ -53,6 +58,20 @@ const fmtCADCompact = new Intl.NumberFormat("en-CA", {
 });
 
 const TRANSITION_MS = 520;
+
+// Chart palette — dark editorial.
+// Emerald: counterfactual / early-start path (luminous). Cream-ink: actual /
+// your path. Amber-copper: the gap. FIRE line: pale gold.
+const COLOR_EMERALD = "#34d399";
+const COLOR_INK = "#f4ede1";
+const COLOR_COPPER = "#f59e0b";
+const COLOR_COPPER_DEEP = "#fbbf24";
+const COLOR_FIRE = "#e7d9b4";
+const COLOR_AXIS = "#3a4256";
+const COLOR_GRID = "#1a212c";
+const COLOR_TICK = "#3a4256";
+const COLOR_TEXT_MUTED = "#a7a195";
+const COLOR_TEXT_WHISPER = "#6b6759";
 
 export default function Timeline({ model, scene, progress }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -103,8 +122,9 @@ export default function Timeline({ model, scene, progress }: Props) {
       .attr("class", "chart-subtitle")
       .attr("x", margin.left)
       .attr("y", 22)
-      .attr("fill", "#737373")
+      .attr("fill", COLOR_TEXT_MUTED)
       .attr("font-size", 12)
+      .attr("font-style", "italic")
       .text(chartState.subtitle);
 
     root
@@ -115,7 +135,7 @@ export default function Timeline({ model, scene, progress }: Props) {
       .call(d3.axisLeft(y).ticks(5).tickSize(-innerWidth).tickFormat(() => ""))
       .call((g) => {
         g.select(".domain").remove();
-        g.selectAll("line").attr("stroke", "#e5e5e5");
+        g.selectAll("line").attr("stroke", COLOR_GRID);
       });
 
     root
@@ -132,9 +152,12 @@ export default function Timeline({ model, scene, progress }: Props) {
           .tickFormat((d) => `${Math.round(Number(d))}`),
       )
       .call((g) => {
-        g.select(".domain").attr("stroke", "#a3a3a3");
-        g.selectAll("line").attr("stroke", "#d4d4d4");
-        g.selectAll("text").attr("fill", "#737373").attr("font-size", 12);
+        g.select(".domain").attr("stroke", COLOR_AXIS);
+        g.selectAll("line").attr("stroke", COLOR_TICK);
+        g.selectAll("text")
+          .attr("fill", COLOR_TEXT_MUTED)
+          .attr("font-size", 11)
+          .attr("font-family", "var(--font-mono), ui-monospace, monospace");
       });
 
     root
@@ -151,8 +174,11 @@ export default function Timeline({ model, scene, progress }: Props) {
       )
       .call((g) => {
         g.select(".domain").remove();
-        g.selectAll("line").attr("stroke", "#d4d4d4");
-        g.selectAll("text").attr("fill", "#737373").attr("font-size", 12);
+        g.selectAll("line").attr("stroke", COLOR_TICK);
+        g.selectAll("text")
+          .attr("fill", COLOR_TEXT_MUTED)
+          .attr("font-size", 11)
+          .attr("font-family", "var(--font-mono), ui-monospace, monospace");
       });
 
     renderAxisMarkers(root, x, innerHeight, model);
@@ -165,7 +191,7 @@ export default function Timeline({ model, scene, progress }: Props) {
       line,
       chartState.earlyOnlyLine,
       "early-only",
-      "#2563eb",
+      COLOR_EMERALD,
       "",
     );
     renderPath(
@@ -175,7 +201,7 @@ export default function Timeline({ model, scene, progress }: Props) {
       line,
       chartState.counterfactualLine,
       "counterfactual",
-      "#2563eb",
+      COLOR_EMERALD,
       "Early start",
     );
     renderPath(
@@ -185,7 +211,7 @@ export default function Timeline({ model, scene, progress }: Props) {
       line,
       chartState.actualLine,
       "actual",
-      "#111827",
+      COLOR_INK,
       "Your path",
     );
     renderMarkers(root, x, y, chartState.markers);
@@ -199,10 +225,11 @@ export default function Timeline({ model, scene, progress }: Props) {
       .attr("x", margin.left + innerWidth / 2)
       .attr("y", height - 14)
       .attr("text-anchor", "middle")
-      .attr("fill", "#737373")
-      .attr("font-size", 12)
+      .attr("fill", COLOR_TEXT_MUTED)
+      .attr("font-size", 10)
       .attr("font-weight", 500)
-      .text("Age");
+      .attr("letter-spacing", "0.18em")
+      .text("AGE");
 
     svg
       .selectAll<SVGTextElement, null>("text.y-axis-title")
@@ -211,14 +238,23 @@ export default function Timeline({ model, scene, progress }: Props) {
       .attr("class", "y-axis-title")
       .attr("transform", `translate(20, ${margin.top + innerHeight / 2}) rotate(-90)`)
       .attr("text-anchor", "middle")
-      .attr("fill", "#737373")
-      .attr("font-size", 12)
+      .attr("fill", COLOR_TEXT_MUTED)
+      .attr("font-size", 10)
       .attr("font-weight", 500)
-      .text("Balance (CAD, today's dollars)");
+      .attr("letter-spacing", "0.18em")
+      .text("BALANCE (CAD, TODAY)");
   }, [chartState, model]);
 
   return (
-    <div className="w-full border-y border-neutral-200 bg-neutral-50 py-3 lg:border-y-0 lg:py-0">
+    <div className="relative w-full border-y border-[var(--color-rule-strong)] bg-[var(--color-paper-elevated)]/85 py-4 shadow-[0_1px_0_rgba(255,255,255,0.03)_inset,0_18px_40px_-20px_rgba(52,211,153,0.25),0_1px_30px_-12px_rgba(245,158,11,0.18)] backdrop-blur-sm lg:rounded-sm lg:border-y lg:border-x lg:py-2">
+      {/* Tiny chart-corner numeral, like a wealth-report figure label. */}
+      <span
+        aria-hidden
+        className="absolute right-3 top-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink-whisper)]"
+        style={{ fontFamily: "var(--font-mono), ui-monospace, monospace" }}
+      >
+        Fig. 01 · Trajectory
+      </span>
       <svg
         ref={svgRef}
         role="img"
@@ -329,7 +365,7 @@ function renderAxisMarkers(
       .attr("x2", x(marker.age))
       .attr("y1", innerHeight)
       .attr("y2", innerHeight + 8)
-      .attr("stroke", marker.muted ? "#d4d4d4" : "#737373")
+      .attr("stroke", marker.muted ? COLOR_TICK : COLOR_TEXT_MUTED)
       .attr("stroke-width", 1.5);
 
     group
@@ -339,8 +375,9 @@ function renderAxisMarkers(
       .attr("x", x(marker.age))
       .attr("y", innerHeight + marker.offset)
       .attr("text-anchor", "middle")
-      .attr("fill", marker.muted ? "#a3a3a3" : "#525252")
-      .attr("font-size", 11)
+      .attr("fill", marker.muted ? COLOR_TEXT_WHISPER : COLOR_TEXT_MUTED)
+      .attr("font-size", 10)
+      .attr("font-style", "italic")
       .text(marker.label);
   });
 }
@@ -367,7 +404,7 @@ function renderFireLine(
           .attr("x2", innerWidth)
           .attr("y1", (d) => y(d))
           .attr("y2", (d) => y(d))
-          .attr("stroke", "#0f172a")
+          .attr("stroke", COLOR_FIRE)
           .attr("stroke-dasharray", "4 5")
           .attr("stroke-width", 1.5)
           .style("opacity", 0),
@@ -397,9 +434,10 @@ function renderFireLine(
           .append("text")
           .attr("class", "fire-label")
           .attr("text-anchor", "end")
-          .attr("fill", "#0f172a")
-          .attr("font-size", 12)
-          .attr("font-weight", 700)
+          .attr("fill", COLOR_FIRE)
+          .attr("font-size", 11)
+          .attr("font-weight", 600)
+          .attr("font-family", "var(--font-mono), ui-monospace, monospace")
           .style("opacity", 0),
       (update) => update,
       (exit) =>
@@ -454,7 +492,7 @@ function renderGapLine(
       .selectAll<SVGLineElement, null>("line")
       .data([null])
       .join("line")
-      .attr("stroke", "#b45309")
+      .attr("stroke", COLOR_COPPER)
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "3 4")
       .transition()
@@ -469,13 +507,15 @@ function renderGapLine(
       .selectAll<SVGTextElement, null>("text")
       .data([null])
       .join("text")
-      .attr("fill", "#92400e")
-      .attr("font-size", 12)
-      .attr("font-weight", 700)
+      .attr("fill", COLOR_COPPER_DEEP)
+      .attr("font-size", 11)
+      .attr("font-weight", 600)
+      .attr("font-family", "var(--font-mono), ui-monospace, monospace")
+      .attr("text-anchor", "end")
       .transition()
       .duration(TRANSITION_MS)
       .ease(d3.easeCubicOut)
-      .attr("x", x(gap.actual.age) + 10)
+      .attr("x", x(gap.actual.age) - 10)
       .attr("y", (y(gap.actual.balance) + y(gap.counterfactual.balance)) / 2)
       .text(gap.label ?? "The gap");
   });
@@ -524,12 +564,14 @@ function renderMarkers(
 
   groups
     .select("text")
-    .attr("font-size", 12)
-    .attr("font-weight", 700)
+    .attr("font-size", 11)
+    .attr("font-weight", 600)
+    .attr("font-family", "var(--font-mono), ui-monospace, monospace")
+    .attr("text-anchor", (d) => d.labelAnchor ?? "start")
     .transition()
     .duration(TRANSITION_MS)
     .ease(d3.easeCubicOut)
-    .attr("x", 10)
+    .attr("x", (d) => d.labelOffsetX ?? (d.labelAnchor === "end" ? -10 : 10))
     .attr("y", (d) => d.labelOffsetY)
     .attr("fill", (d) => d.color)
     .text((d) => d.label);
@@ -594,13 +636,20 @@ function renderDropLines(
 
   groups
     .select("text")
-    .attr("font-size", 12)
-    .attr("font-weight", 700)
+    .attr("font-size", 11)
+    .attr("font-weight", 600)
+    .attr("font-family", "var(--font-mono), ui-monospace, monospace")
+    .attr("text-anchor", (d) => d.labelAnchor ?? "start")
     .transition()
     .duration(TRANSITION_MS)
     .ease(d3.easeCubicOut)
-    .attr("x", (d) => x(d.point.age) + 10)
-    .attr("y", (d) => y(d.point.balance) - 12)
+    .attr(
+      "x",
+      (d) =>
+        x(d.point.age) +
+        (d.labelOffsetX ?? (d.labelAnchor === "end" ? -10 : 10)),
+    )
+    .attr("y", (d) => y(d.point.balance) + (d.labelOffsetY ?? -12))
     .attr("fill", (d) => d.color)
     .text((d) => d.label);
 }
@@ -646,7 +695,7 @@ function getChartState(
         {
           id: "start",
           point: { age: rewindAge, balance: 0 },
-          color: "#2563eb",
+          color: COLOR_EMERALD,
           label:
             progress > 0.96
               ? `$0 at ${inputs.startWorkingAge}`
@@ -671,7 +720,7 @@ function getChartState(
       earlyOnlyLine,
       counterfactualLine: [],
       actualLine: [],
-      markers: markerAtEnd(earlyOnlyLine, "#2563eb", "Early start begins"),
+      markers: markerAtEnd(earlyOnlyLine, COLOR_EMERALD, "Early start begins"),
       dropLines: [],
       showFireLine: false,
       gapLine: null,
@@ -689,7 +738,7 @@ function getChartState(
       earlyOnlyLine,
       counterfactualLine: [],
       actualLine: [],
-      markers: markerAtEnd(earlyOnlyLine, "#2563eb", "Compounding"),
+      markers: markerAtEnd(earlyOnlyLine, COLOR_EMERALD, "Compounding"),
       dropLines: [],
       showFireLine: false,
       gapLine: null,
@@ -706,18 +755,22 @@ function getChartState(
       markers.push({
         id: "you-today",
         point: actualToday,
-        color: "#111827",
+        color: COLOR_INK,
         label: `You: ${fmtCADCompact.format(actualToday.balance)}`,
         labelOffsetY: 20,
+        labelAnchor: "end",
+        labelOffsetX: -10,
       });
     }
     if (progress >= 0.55) {
       markers.push({
         id: "combined-today",
         point: combinedToday,
-        color: "#2563eb",
+        color: COLOR_EMERALD,
         label: `Combined: ${fmtCADCompact.format(combinedToday.balance)}`,
         labelOffsetY: -14,
+        labelAnchor: "end",
+        labelOffsetX: -10,
       });
     }
 
@@ -788,6 +841,10 @@ function markerAtEnd(
 
 function retirementDropLines(model: NarrativeModel): DropLine[] {
   const lines: DropLine[] = [];
+  // Both points land near the FIRE-target balance, so vertical stacking with
+  // y-12 would overlap. Anchor the early-start (left point) label to its
+  // *left* and the actual (right point) label to its *right*, and offset
+  // vertically in opposite directions so they never collide.
   if (model.counterfactualRetirementAge !== null) {
     const point = pointAtAge(
       model.counterfactualPoints,
@@ -797,8 +854,11 @@ function retirementDropLines(model: NarrativeModel): DropLine[] {
       lines.push({
         id: "counterfactual-fire",
         point,
-        color: "#2563eb",
-        label: `Early-start FIRE: ${Math.round(model.counterfactualRetirementAge)}`,
+        color: COLOR_EMERALD,
+        label: `Early-start FIRE · age ${Math.round(model.counterfactualRetirementAge)}`,
+        labelAnchor: "end",
+        labelOffsetX: -10,
+        labelOffsetY: -16,
       });
     }
   }
@@ -808,8 +868,11 @@ function retirementDropLines(model: NarrativeModel): DropLine[] {
       lines.push({
         id: "actual-fire",
         point,
-        color: "#111827",
-        label: `Your FIRE: ${Math.round(model.actualRetirementAge)}`,
+        color: COLOR_INK,
+        label: `Your FIRE · age ${Math.round(model.actualRetirementAge)}`,
+        labelAnchor: "start",
+        labelOffsetX: 10,
+        labelOffsetY: 22,
       });
     }
   }

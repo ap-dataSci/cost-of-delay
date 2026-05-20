@@ -7,6 +7,12 @@ type Props = {
   nextTargetId: string;
 };
 
+/**
+ * The scroll-gate sits at the bottom of each form page. When the page is
+ * invalid, the chevron is dim and disabled with an apologetic note. When
+ * valid, it morphs into a pill button with copper accent, animated chevron,
+ * and a hint inviting the next move.
+ */
 export default function ScrollGate({
   valid,
   validHint,
@@ -23,15 +29,16 @@ export default function ScrollGate({
 
   return (
     <div
-      className="flex flex-col items-center gap-2 pb-12 pt-16 transition-opacity duration-500"
+      className="flex flex-col items-center gap-4 pb-12 pt-16"
       aria-live="polite"
     >
       <p
-        className={
+        className={[
+          "numeral motion-safe:transition-colors motion-safe:duration-500",
           valid
-            ? "text-sm text-neutral-500"
-            : "text-sm text-neutral-300"
-        }
+            ? "!text-[var(--color-copper)]"
+            : "!text-[var(--color-ink-whisper)]",
+        ].join(" ")}
       >
         {valid ? validHint : invalidHint}
       </p>
@@ -41,12 +48,19 @@ export default function ScrollGate({
         disabled={!valid}
         aria-label={valid ? validHint : invalidHint}
         className={[
-          "grid h-10 w-10 place-items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2",
+          "group relative grid place-items-center rounded-full",
+          "motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-out",
           valid
-            ? "cursor-pointer text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
-            : "cursor-not-allowed text-neutral-300",
+            ? "h-11 w-11 cursor-pointer border border-[var(--color-copper)] text-[var(--color-copper)] hover:bg-[var(--color-copper)] hover:text-[var(--color-paper)]"
+            : "h-10 w-10 cursor-not-allowed border border-[var(--color-rule-strong)] text-[var(--color-ink-whisper)]",
         ].join(" ")}
       >
+        {valid ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-full border border-[var(--color-copper)] opacity-50 motion-safe:animate-pulse-soft"
+          />
+        ) : null}
         <Chevron animated={valid} />
       </button>
     </div>
@@ -56,8 +70,8 @@ export default function ScrollGate({
 function Chevron({ animated }: { animated: boolean }) {
   return (
     <svg
-      width="28"
-      height="28"
+      width="22"
+      height="22"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -65,7 +79,8 @@ function Chevron({ animated }: { animated: boolean }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={[
-        animated ? "animate-[bounce_2s_ease-in-out_infinite]" : "",
+        "motion-safe:transition-transform motion-safe:duration-300",
+        animated ? "motion-safe:group-hover:translate-y-0.5" : "",
       ].join(" ")}
       aria-hidden="true"
     >

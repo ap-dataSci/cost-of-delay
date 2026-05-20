@@ -98,7 +98,12 @@ export const copy = {
         `What if you'd put even $${pastMonthlyCapacity.toLocaleString("en-CA")}/month into a globally-diversified index fund (XEQT, ${(returnRate * 100).toFixed(1)}% nominal) from day one?`,
     },
     n3: {
-      text: "The first decade looks unremarkable. The second doesn't.",
+      text: (yearsElapsed: number) =>
+        yearsElapsed >= 18
+          ? "The first decade looks unremarkable. The second doesn't."
+          : yearsElapsed >= 10
+            ? `${yearsElapsed} years of quiet doubling. The curve only looks calm because you're standing too close to it.`
+            : `${yearsElapsed} years isn't enough to see the bend yet — but the slope is already deciding the rest of your life.`,
       annotation: "This is compounding. Boring until it isn't.",
     },
     n4: {

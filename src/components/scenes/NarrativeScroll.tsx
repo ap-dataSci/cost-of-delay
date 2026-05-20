@@ -36,14 +36,28 @@ export default function NarrativeScroll({ inputs }: Props) {
     <section
       id="narrative"
       aria-label="Cost of delay narrative"
-      className="bg-neutral-50"
+      className="relative border-t border-[var(--color-rule)]"
     >
+      {/* Sectional header that announces we've left the form behind. */}
+      <div className="mx-auto max-w-6xl px-6 pt-16 lg:pt-24">
+        <div className="flex items-center gap-3">
+          <span className="numeral">II</span>
+          <span aria-hidden className="h-px w-12 bg-[var(--color-copper)]/60" />
+          <span className="numeral !text-[var(--color-ink-whisper)]">
+            The reveal
+          </span>
+        </div>
+        <h2 className="display mt-4 text-3xl text-[var(--color-ink)] md:text-4xl">
+          Two trajectories.
+        </h2>
+      </div>
+
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid gap-6 lg:grid-cols-[minmax(280px,0.78fr)_minmax(0,1.22fr)] lg:gap-12">
           {/* Sticky chart column. Mobile: pinned to top, ~45vh tall. Desktop:
               full-height column, centered vertically. */}
           <div className="order-1 lg:order-2">
-            <div className="sticky top-0 z-10 flex h-[48vh] items-center border-b border-neutral-200 bg-neutral-50/95 py-3 backdrop-blur lg:h-screen lg:border-0 lg:bg-transparent lg:py-0 lg:backdrop-blur-0">
+            <div className="sticky top-0 z-10 flex h-[52vh] items-center border-b border-[var(--color-rule)] bg-[var(--color-paper)]/80 py-3 backdrop-blur lg:h-screen lg:border-0 lg:bg-transparent lg:py-0 lg:backdrop-blur-0">
               <div className="w-full">
                 <Timeline
                   model={model}
