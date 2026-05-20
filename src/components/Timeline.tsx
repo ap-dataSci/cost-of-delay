@@ -48,6 +48,10 @@ type ChartState = {
   gapLine:
     | { actual: BalancePoint; counterfactual: BalancePoint; label?: string }
     | null;
+  // Vertical reference line at the user's target retirement age. Shown in N5
+  // so they can see where the actual/counterfactual FIRE ages land relative
+  // to their stated ambition.
+  targetAgeLine: { age: number; label: string } | null;
 };
 
 const fmtCADCompact = new Intl.NumberFormat("en-CA", {
@@ -183,6 +187,7 @@ export default function Timeline({ model, scene, progress }: Props) {
 
     renderAxisMarkers(root, x, innerHeight, model);
     renderFireLine(root, x, y, innerWidth, model, chartState);
+    renderTargetAgeLine(root, x, innerHeight, chartState);
     renderGapLine(root, x, y, chartState);
     renderPath(
       root,
@@ -457,6 +462,90 @@ function renderFireLine(
     .text(`FIRE number ${fmtCADCompact.format(model.fireTarget)}`);
 }
 
+function renderTargetAgeLine(
+  root: d3.Selection<SVGGElement, null, SVGSVGElement, unknown>,
+  x: d3.ScaleLinear<number, number>,
+  innerHeight: number,
+  chartState: ChartState,
+) {
+  const data = chartState.targetAgeLine ? [chartState.targetAgeLine] : [];
+
+  const groups = root
+    .selectAll<SVGGElement, NonNullable<ChartState["targetAgeLine"]>>(
+      "g.target-age-line",
+    )
+    .data(data)
+    .join(
+      (enter) =>
+        enter.append("g").attr("class", "target-age-line").style("opacity", 0),
+      (update) => update,
+      (exit) =>
+        exit
+          .transition()
+          .duration(TRANSITION_MS)
+          .ease(d3.easeCubicOut)
+          .style("opacity", 0)
+          .remove(),
+    );
+
+  groups
+    .transition()
+    .duration(TRANSITION_MS)
+    .ease(d3.easeCubicOut)
+    .style("opacity", 1);
+
+  groups.each(function render(line) {
+    const groupSelection = d3.select(this);
+
+    groupSelection
+      .selectAll<SVGLineElement, null>("line")
+      .data([null])
+      .join("line")
+      .attr("stroke", COLOR_INK)
+      .attr("stroke-opacity", 0.45)
+      .attr("stroke-width", 1.25)
+      .attr("stroke-dasharray", "2 6")
+      .transition()
+      .duration(TRANSITION_MS)
+      .ease(d3.easeCubicOut)
+      .attr("x1", x(line.age))
+      .attr("x2", x(line.age))
+      .attr("y1", 0)
+      .attr("y2", innerHeight);
+
+    // Small notch/circle at the bottom of the line so it reads as a tick.
+    groupSelection
+      .selectAll<SVGCircleElement, null>("circle")
+      .data([null])
+      .join("circle")
+      .attr("fill", COLOR_INK)
+      .attr("fill-opacity", 0.55)
+      .attr("r", 2.5)
+      .transition()
+      .duration(TRANSITION_MS)
+      .ease(d3.easeCubicOut)
+      .attr("cx", x(line.age))
+      .attr("cy", innerHeight);
+
+    groupSelection
+      .selectAll<SVGTextElement, null>("text")
+      .data([null])
+      .join("text")
+      .attr("fill", COLOR_INK)
+      .attr("fill-opacity", 0.7)
+      .attr("font-size", 11)
+      .attr("font-weight", 600)
+      .attr("font-family", "var(--font-mono), ui-monospace, monospace")
+      .attr("text-anchor", "start")
+      .transition()
+      .duration(TRANSITION_MS)
+      .ease(d3.easeCubicOut)
+      .attr("x", x(line.age) + 6)
+      .attr("y", 12)
+      .text(line.label);
+  });
+}
+
 function renderGapLine(
   root: d3.Selection<SVGGElement, null, SVGSVGElement, unknown>,
   x: d3.ScaleLinear<number, number>,
@@ -706,6 +795,7 @@ function getChartState(
       dropLines: [],
       showFireLine: false,
       gapLine: null,
+      targetAgeLine: null,
     };
   }
 
@@ -724,6 +814,7 @@ function getChartState(
       dropLines: [],
       showFireLine: false,
       gapLine: null,
+      targetAgeLine: null,
     };
   }
 
@@ -742,6 +833,7 @@ function getChartState(
       dropLines: [],
       showFireLine: false,
       gapLine: null,
+      targetAgeLine: null,
     };
   }
 
@@ -792,6 +884,7 @@ function getChartState(
               label: `Head start: ${fmtCADCompact.format(model.headStart)}`,
             }
           : null,
+      targetAgeLine: null,
     };
   }
 
@@ -817,6 +910,10 @@ function getChartState(
     dropLines: progress > 0.35 ? retirementDropLines(model) : [],
     showFireLine: true,
     gapLine: null,
+    targetAgeLine: {
+      age: inputs.targetRetirementAge,
+      label: `Target · age ${inputs.targetRetirementAge}`,
+    },
   };
 }
 
