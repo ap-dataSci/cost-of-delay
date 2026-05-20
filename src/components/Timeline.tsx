@@ -433,13 +433,13 @@ function renderFireLine(
         enter
           .append("text")
           .attr("class", "fire-label")
-          .attr("text-anchor", "end")
+          .attr("text-anchor", "start")
           .attr("fill", COLOR_FIRE)
           .attr("font-size", 11)
           .attr("font-weight", 600)
           .attr("font-family", "var(--font-mono), ui-monospace, monospace")
           .style("opacity", 0),
-      (update) => update,
+      (update) => update.attr("text-anchor", "start"),
       (exit) =>
         exit
           .transition()
@@ -451,8 +451,8 @@ function renderFireLine(
     .transition()
     .duration(TRANSITION_MS)
     .ease(d3.easeCubicOut)
-    .attr("x", x(model.maxAge))
-    .attr("y", (d) => y(d) - 10)
+    .attr("x", 4)
+    .attr("y", (d) => y(d) - 8)
     .style("opacity", 1)
     .text(`FIRE number ${fmtCADCompact.format(model.fireTarget)}`);
 }
